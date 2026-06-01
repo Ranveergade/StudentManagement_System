@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}View Students | StudentMS{% endblock %}
+
+{% block content %}
+{% if user.groups.all.0.name == "Teacher" %}
+<div class="section-stack">
+<section class="hero-banner">
+    <div>
+        <span class="eyebrow">Teacher Dashboard</span>
+        <h1 class="hero-title">Student performance overview</h1>
+        <p class="hero-copy">Review every student record, filter instantly, and monitor classroom performance with live analytics.</p>
+    </div>
+    <div class="hero-side">
+        <span>Active View</span>
+        <strong>All Students</strong>
+        <small>{{ user.username }}</small>
+    </div>
+</section>
+
+<section class="stats-grid" id="teacher-stats">
+    <article class="metric-card">
+        <div class="metric-icon tone-sky"><i class="bi bi-people-fill"></i></div>
+        <div>
+            <span>Total Students</span>
+            <strong id="totalStudents">0</strong>
+        </div>
+    </article>
+    <article class="metric-card">
+        <div class="metric-icon tone-primary"><i class="bi bi-bar-chart-line-fill"></i></div>
+        <div>
+            <span>Average GPA</span>
+            <strong id="averageGpa">0.00</strong>
+        </div>
+    </article>
+    <article class="metric-card">
+        <div class="metric-icon tone-emerald"><i class="bi bi-clipboard2-data-fill"></i></div>
+        <div>
+            <span>Average Attendance</span>
+            <strong id="averageAttendance">0.00%</strong>
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>Student Directory</h2>
+            <p>Search by student ID or name and review the full classroom list.</p>
+        </div>
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="studentSearch" placeholder="Search by student ID or name">
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>GPA</th>
+                    <th>Attendance</th>
+                    <th>Avg Grade</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody">
+                {% for st in students %}
+                <tr class="student-row" data-student-id="{{ st.student_id|lower }}" data-student-name="{{ st.name|lower }}" data-gpa="{{ st.gpa }}" data-attendance="{{ st.attendance }}">
+                    <td><span class="student-pill">{{ st.student_id }}</span></td>
+                    <td>{{ st.name }}</td>
+                    <td>
+                        <span class="score-badge {% if st.gpa < 2.5 %}danger{% endif %}">
+                            {{ st.gpa }}
+                        </span>
+                    </td>
+                   <td>
+                        {% if st.attendance < 0.75 %}
+                            <span style="color:orange; font-weight:bold;">
+                                {{ st.attendance }}% (Low)
+                                </span>
+                            {% else %}
+                        {{ st.attendance }}%
+                            {% endif %}
+                                    </td>
+
+                    <td>{{ st.avg_grade }}</td>
+                    <td>
+                        <div class="actions">
+                            <a class="btn btn-outline btn-sm" href="{% url 'update' st.id %}">Update</a>
+                            <a class="btn btn-danger btn-sm" href="{% url 'delete' st.id %}">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="muted">No students found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <div>
+            <h3>GPA by Student</h3>
+            <p>Bar chart of GPA across all visible students.</p>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="teacherGpaChart"></canvas>
+        </div>
+    </article>
+
+    <article class="chart-card">
+        <div>
+            <h3>Risk Distribution</h3>
+            <p>At Risk means GPA below 5. Safe means GPA 5 or above.</p>
+        </div>
+        <div class="chart-wrap compact">
+            <canvas id="teacherRiskChart"></canvas>
+        </div>
+    </article>
+</section>
+</div>
+
+<script>
+    (function () {
+        const searchInput = document.getElementById('studentSearch');
+        const rows = Array.from(document.querySelectorAll('.student-row'));
+        const totalStudents = document.getElementById('totalStudents');
+        const averageGpa = document.getElementById('averageGpa');
+        const averageAttendance = document.getElementById('averageAttendance');
+        let teacherGpaChart = null;
+        let teacherRiskChart = null;
+
+        function updateStats(visibleRows) {
+            const count = visibleRows.length;
+            const gpaTotal = visibleRows.reduce((sum, row) => sum + parseFloat(row.dataset.gpa || 0), 0);
+            const attendanceTotal = visibleRows.reduce((sum, row) => sum + parseFloat(row.dataset.attendance || 0), 0);
+
+            totalStudents.textContent = count;
+            averageGpa.textContent = count ? (gpaTotal / count).toFixed(2) : '0.00';
+            averageAttendance.textContent = count ? (attendanceTotal / count).toFixed(2) + '%' : '0.00%';
+        }
+
+        function buildCharts(visibleRows) {
+            const labels = visibleRows.map(function (row) { return row.dataset.studentId.toUpperCase(); });
+            const gpas = visibleRows.map(function (row) { return parseFloat(row.dataset.gpa || 0); });
+            const riskCount = visibleRows.filter(function (row) { return parseFloat(row.dataset.gpa || 0) < 5; }).length;
+            const safeCount = visibleRows.length - riskCount;
+
+            if (teacherGpaChart) {
+                teacherGpaChart.destroy();
+            }
+
+            if (teacherRiskChart) {
+                teacherRiskChart.destroy();
+            }
+
+            teacherGpaChart = new Chart(document.getElementById('teacherGpaChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'GPA',
+                        data: gpas,
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 10,
+                        maxBarThickness: 34
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 10,
+                            ticks: { stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            teacherRiskChart = new Chart(document.getElementById('teacherRiskChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['At Risk', 'Safe'],
+                    datasets: [{
+                        data: [riskCount, safeCount],
+                        backgroundColor: ['#dc2626', '#059669'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function filterRows() {
+            const query = (searchInput.value || '').trim().toLowerCase();
+            const visibleRows = [];
+
+            rows.forEach(function (row) {
+                const studentId = row.dataset.studentId || '';
+                const studentName = row.dataset.studentName || '';
+                const match = studentId.includes(query) || studentName.includes(query);
+                row.style.display = match ? '' : 'none';
+                if (match) {
+                    visibleRows.push(row);
+                }
+            });
+
+            updateStats(visibleRows);
+            buildCharts(visibleRows);
+        }
+
+        updateStats(rows);
+        buildCharts(rows);
+        if (searchInput) {
+            searchInput.addEventListener('input', filterRows);
+        }
+    })();
+</script>
+{% else %}
+{% for st in students %}
+<div class="section-stack">
+<section class="hero-banner student">
+    <div>
+        <span class="eyebrow">Student Dashboard</span>
+        <h1 class="hero-title">Welcome back, {{ st.name }}</h1>
+        <p class="hero-copy">A clean snapshot of your academic performance, attendance, and overall progress.</p>
+    </div>
+    <div class="hero-side">
+        <span>Student ID</span>
+        <strong>{{ st.student_id }}</strong>
+        <small>{{ user.username }}</small>
+    </div>
+</section>
+
+<section class="student-metrics-grid">
+    <article class="student-card">
+        <div class="student-icon tone-primary"><i class="bi bi-award-fill"></i></div>
+        <div>
+            <span>GPA</span>
+            <strong>{{ st.gpa }}</strong>
+            {% if st.gpa < 5 %}
+            <p class="risk-text">At Risk</p>
+            {% else %}
+            <p class="safe-text">Safe</p>
+            {% endif %}
+        </div>
+    </article>
+
+    <article class="student-card">
+        <div class="student-icon tone-emerald"><i class="bi bi-calendar2-check-fill"></i></div>
+        <div>
+            <span>Attendance</span>
+            <strong>{{ st.attendance }}%</strong>
+            <p class="card-note">Keep your consistency high.</p>
+        </div>
+    </article>
+
+    <article class="student-card">
+        <div class="student-icon tone-sky"><i class="bi bi-graph-up-arrow"></i></div>
+        <div>
+            <span>Average Grade</span>
+            <strong>{{ st.avg_grade }}</strong>
+            <p class="card-note">Your overall academic average.</p>
+        </div>
+    </article>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <div>
+            <h3>GPA Progress Ring</h3>
+            <p>Your current GPA against the maximum score of 10.</p>
+        </div>
+        <div class="chart-wrap compact">
+            <canvas id="studentGpaChart"></canvas>
+        </div>
+    </article>
+
+    <article class="chart-card">
+        <div>
+            <h3>Performance Snapshot</h3>
+            <p>Side-by-side view of GPA, attendance, and average grade.</p>
+        </div>
+        <div class="chart-wrap compact">
+            <canvas id="studentMetricsChart"></canvas>
+        </div>
+    </article>
+</section>
+</div>
+
+<script>
+    (function () {
+        const gpa = parseFloat('{{ st.gpa }}') || 0;
+        const attendance = parseFloat('{{ st.attendance }}') || 0;
+        const avgGrade = parseFloat('{{ st.avg_grade }}') || 0;
+
+        new Chart(document.getElementById('studentGpaChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['GPA', 'Remaining'],
+                datasets: [{
+                    data: [gpa, Math.max(10 - gpa, 0)],
+                    backgroundColor: ['#4f46e5', '#e2e8f0'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('studentMetricsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['GPA', 'Attendance', 'Avg Grade'],
+                datasets: [{
+                    label: 'Score',
+                    data: [gpa, attendance, avgGrade],
+                    backgroundColor: ['#4f46e5', '#059669', '#0ea5e9'],
+                    borderRadius: 10,
+                    maxBarThickness: 42
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    })();
+</script>
+{% empty %}
+<article class="panel empty-state">
+    <h2>No student data available</h2>
+    <p class="muted">Your profile has no records yet.</p>
+</article>
+{% endfor %}
+{% endif %}
+{% endblock %}

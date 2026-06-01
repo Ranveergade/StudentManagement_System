@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Search Student | StudentMS{% endblock %}
+
+{% block content %}
+<div class="section-stack content-shell">
+    <section class="panel form-panel">
+        <div class="panel-head">
+            <div>
+                <h2>Search Student</h2>
+                <p>Look up a student record using the existing search workflow.</p>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="field full">
+                    <label for="student_id">Student ID</label>
+                    <input id="student_id" type="text" name="student_id" placeholder="Enter student ID" required>
+                </div>
+            </div>
+            <div class="button-row" style="margin-top: 18px;">
+                <button class="btn btn-primary" type="submit">Search</button>
+                <a class="btn btn-outline" href="{% url 'view' %}">Back to Dashboard</a>
+            </div>
+        </form>
+    </section>
+
+    {% if result %}
+        {% for s in result %}
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>{{ s.name }}</h2>
+                    <p>Student record details</p>
+                </div>
+            </div>
+            <div class="info-grid">
+                <article class="info-card"><span>Student ID</span><strong>{{ s.student_id }}</strong></article>
+                <article class="info-card"><span>GPA</span><strong>{{ s.gpa }}</strong></article>
+                <article class="info-card"><span>Attendance</span><strong>{{ s.attendance }}%</strong></article>
+                <article class="info-card"><span>Average Grade</span><strong>{{ s.avg_grade }}</strong></article>
+            </div>
+        </section>
+        {% endfor %}
+    {% elif result is not none %}
+        <section class="panel empty-state">
+            <h2>No student found</h2>
+            <p class="muted">No records matched that search value.</p>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

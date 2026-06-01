@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <section class="panel form-panel">
+        <div class="panel-head">
+            <div>
+                <h2>Sign In</h2>
+                <p>Access the student management dashboard with your account credentials.</p>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="field full">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" name="username" placeholder="Enter your username" required>
+                </div>
+
+                <div class="field full">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" placeholder="Enter your password" required>
+                </div>
+            </div>
+
+            <div class="button-row" style="margin-top: 18px;">
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a class="btn btn-outline" href="{% url 'home' %}">Back Home</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

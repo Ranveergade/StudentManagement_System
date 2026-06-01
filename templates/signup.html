@@ -1,0 +1,16 @@
+<h2>Signup</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <input type="text" name="username" placeholder="Username"><br><br>
+
+    <input type="password" name="password" placeholder="Password"><br><br>
+
+    <select name="role">
+        <option value="Student">Student</option>
+        <option value="Teacher">Teacher</option>
+    </select><br><br>
+
+    <button type="submit">Signup</button>
+</form>

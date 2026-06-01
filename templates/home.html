@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Home | StudentMS{% endblock %}
+
+{% block content %}
+<div class="section-stack content-shell">
+    <section class="hero-banner">
+        <div>
+            <span class="eyebrow">Welcome</span>
+            <h1 class="hero-title">Student analytics in one modern dashboard</h1>
+            <p class="hero-copy">Access student records, monitor performance trends, review attendance, and manage academic data from a single clean workspace.</p>
+            <div class="button-row hero-actions">
+                <a class="btn btn-primary" href="{% url 'view' %}">Open Dashboard</a>
+                <a class="btn btn-outline" href="{% url 'search' %}">Search Student</a>
+                <a class="btn btn-outline" href="{% url 'view' %}">View Records</a>
+            </div>
+        </div>
+        <div class="hero-side">
+            <span>Current User</span>
+            <strong>{{ user.username }}</strong>
+            <small>Use the navigation bar to move across the system.</small>
+        </div>
+    </section>
+
+    <section class="info-grid">
+        <article class="info-card">
+            <span>Role-Based Access</span>
+            <strong>Teacher and Student workflows</strong>
+        </article>
+        <article class="info-card">
+            <span>Performance Tracking</span>
+            <strong>GPA, attendance, and average grade</strong>
+        </article>
+        <article class="info-card">
+            <span>Quick Actions</span>
+            <strong>View, search, update, and manage data</strong>
+        </article>
+    </section>
+</div>
+{% endblock %}
