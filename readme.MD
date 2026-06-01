@@ -6,6 +6,9 @@ A role-based Student Management System built with Django that enables secure man
 
 This project was developed to streamline student record management in educational institutions. The system provides separate dashboards for Teachers and Students, allowing secure access to academic information, attendance records, and performance metrics through role-based authentication.
 
+##  Live Deployment Link:-
+https://studentmanagement-system-7tn5.onrender.com/
+
 ## 🚀 Features
 
 ### 👨‍🏫 Teacher Features
@@ -162,7 +165,7 @@ python manage.py runserver
 ### Teacher Account
 
 ```text
-Username: teacher
+Username: Teacher
 Password: root@123
 ```
 
