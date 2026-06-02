@@ -1,17 +1,17 @@
-# 🎓 Student Management System
+#  Student Management System
 
 A role-based Student Management System built with Django that enables secure management of student records, academic performance tracking, attendance monitoring, and user authentication.
 
-## 📌 Project Overview
+##  Project Overview
 
 This project was developed to streamline student record management in educational institutions. The system provides separate dashboards for Teachers and Students, allowing secure access to academic information, attendance records, and performance metrics through role-based authentication.
 
 ##  Live Deployment Link:-
 https://studentmanagement-system-7tn5.onrender.com/
 
-## 🚀 Features
+##  Features
 
-### 👨‍🏫 Teacher Features
+###  Teacher Features
 
 * View all student records
 * Search students by Student ID
@@ -20,7 +20,7 @@ https://studentmanagement-system-7tn5.onrender.com/
 * Delete student records
 * Access administrative dashboard
 
-### 👨‍🎓 Student Features
+### Student Features
 
 * Secure login system
 * View personal profile
@@ -28,7 +28,7 @@ https://studentmanagement-system-7tn5.onrender.com/
 * View academic performance metrics
 * Access personalized dashboard
 
-### 🔐 Authentication & Authorization
+###  Authentication & Authorization
 
 * Django Authentication System
 * Role-Based Access Control (RBAC)
@@ -38,7 +38,7 @@ https://studentmanagement-system-7tn5.onrender.com/
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Backend
 
@@ -61,7 +61,7 @@ https://studentmanagement-system-7tn5.onrender.com/
 * VS Code
 
 ---
-## 💡 Skills Demonstrated
+##  Skills Demonstrated
 
 - Backend Development with Django
 - Authentication & Authorization
@@ -72,7 +72,7 @@ https://studentmanagement-system-7tn5.onrender.com/
 - Python Programming
 - Git & GitHub Version Control
 
-## 📊 Key Functionalities
+##  Key Functionalities
 
 * Student Record Management
 * Authentication System
@@ -85,7 +85,7 @@ https://studentmanagement-system-7tn5.onrender.com/
 
 ---
 
-## 🏗️ Project Architecture
+##  Project Architecture
 
 ```text
 User
@@ -103,7 +103,7 @@ User
        └── Dashboard
 ```
 
-## 📸 Screenshots
+##  Screenshots
 
 * Login Page
 ![LOGIN-PAGE](image.png)
@@ -116,7 +116,7 @@ User
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ### Clone Repository
 
@@ -160,7 +160,7 @@ python manage.py runserver
 
 ---
 
-## 🔑 Demo Credentials
+##  Demo Credentials
 
 ### Teacher Account
 
@@ -180,7 +180,7 @@ Password: stuS1545
 
 ---
 
-## 🎯 Learning Outcomes
+##  Learning Outcomes
 
 Through this project, I gained practical experience in:
 
@@ -195,7 +195,7 @@ Through this project, I gained practical experience in:
 
 ---
 
-## 📂 Repository Structure
+##  Repository Structure
 
 student-management-system/
 ├── stumgm/
@@ -208,7 +208,7 @@ student-management-system/
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Ranveer Gade**
 
